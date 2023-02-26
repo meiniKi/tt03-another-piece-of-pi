@@ -12,7 +12,7 @@ def make_table() -> dict():
 if __name__ == "__main__":
     
     ## SETUP ##
-    NR_DIGITS = 1401
+    NR_DIGITS = 1500
     ###########
     
     assert NR_DIGITS % 3 == 0, "Number of digits must be a multiple of 3"
