@@ -30,6 +30,8 @@ always @(posedge clk) begin
   end else begin
     if (index[1:0] == 'b10) begin
       index <= index + 'd2;
+    end else if ((index[11:2] == 'd466) && (index[1:0] == 'b10)) begin
+      index <= 'b0;
     end else begin
       if (dot_done | index != 'b1) begin
         index <= index + 'd1;
@@ -540,25 +542,8 @@ function [9:0] f(input [9:0] index);
   464: f = 10'b1000100110;
   465: f = 10'b0110011110;
   466: f = 10'b0101111001;
-  467: f = 10'b1101111000;
-  468: f = 10'b0100110101;
-  469: f = 10'b1001111000;
-  470: f = 10'b0011100011;
-  471: f = 10'b1100000000;
-  472: f = 10'b1010111100;
-  473: f = 10'b0011110010;
-  474: f = 10'b0011100100;
-  475: f = 10'b0010100001;
-  476: f = 10'b0110011110;
-  477: f = 10'b1001011000;
-  478: f = 10'b1100110001;
-  479: f = 10'b1010000011;
-  480: f = 10'b0000101000;
-  481: f = 10'b1100011000;
-  482: f = 10'b0101111011;
-  483: f = 10'b1001010101;
   default: f = 10'bXXXXXXXXXX;
-    endcase
+  endcase
 endfunction
 
 
