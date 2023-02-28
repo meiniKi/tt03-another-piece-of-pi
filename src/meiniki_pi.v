@@ -30,8 +30,8 @@ always @(posedge clk) begin
   end else begin
     if (index[1:0] == 'b10) begin
       index <= index + 'd2;
-    end else if ((index[11:2] == 'd466) && (index[1:0] == 'b10)) begin
-      index <= 'b0;
+    //end else if ((index[11:2] == 'd466) && (index[1:0] == 'b10)) begin
+    //  index <= 'b0;
     end else begin
       if (dot_done | index != 'b1) begin
         index <= index + 'd1;
