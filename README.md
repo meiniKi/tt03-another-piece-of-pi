@@ -1,35 +1,30 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg)
 
-# What is Tiny Tapeout?
+# Another Piece of Pi
 
-TinyTapeout is an educational project that aims to make it easier and cheaper than ever to get your digital designs manufactured on a real chip!
+## Description
+This design takes up the idea of James Ross [1], who submitted a circuit to Tiny Tapeout 02 that stores and outputs the first 1024 decimal digits of the number Pi (including the decimal point) to a 7-segment display. In contrast to his approach, a densely packed decimal encoding is used to store the data. With this approach, 1400 digits can be stored and output within the design area of 150um x 170um. However, at 1400 decimals and utilization of 38.99%, the limitation seems to be routing. Like James, I'm also interested to hear about better strategies to fit more information into the design with synthesizable Verilog code.
 
-Go to https://tinytapeout.com for instructions!
+[1] https://github.com/jar/tt02_freespeech
 
-## How to change the Wokwi project
+## How it Works
 
-Edit the [info.yaml](info.yaml) and change the wokwi_id to match your project.
+The circuit stores each triplet of decimals in a 10-bit vector encoded as densely packed decimals. An index vector selects the current digits to be output to the 7-segment display. It consists of an upper part `index[11:2]` that selects the triplet and a lower part `index[1:0]` that specifies the digit within the triplet. First, the upper part decides on the triplet, which is then decoded into three decimals. Afterwards, the lower part selects one of the three decimals to be decoded into 7-segment display logic and applied to the outputs. The index is incremented at each primary clock edge. However, when the lower part equals three, i.e., `index[1:0]==1'b10`, two is added, as the triplet consists of three (not four) digits.
 
-## How to enable the GitHub actions to build the ASIC files
+- `index == 'b0000000000|00`: triplet[0], digit 0 within triplet  
+- `index == 'b0000000000|01`: triplet[0], digit 1 within triplet  
+- `index == 'b0000000000|10`: triplet[0], digit 2 within triplet  
+- `index == 'b0000000001|00`: triplet[1], digit 0 within triplet  
+- `index == 'b0000000001|01`: triplet[1], digit 1 within triplet  
+- `index == 'b0000000001|10`: triplet[1], digit 2 within triplet
 
-Please see the instructions for:
+There is one exception to the rule above: the decimal point. Another multiplexer at the input of the 7-segment decoder can either forward a digit from the decoded tripled or a constant -- the decimal point. Once the lower part of the index counter, i.e., `index[1:0]` reaches `2'b10` for the first time, the multiplexer selects the decimal point and pauses incrementing the index for one clock cycle.
 
-* [Enabling GitHub Actions](https://tinytapeout.com/faq/#when-i-commit-my-change-the-gds-action-isnt-running)
-* [Enabling GitHub Pages](https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part)
+- `index == 'b0000000000|00`: triplet[0], digit 0 within triplet  
+- `index == 'b0000000000|01`: triplet[0], decimal point
+- `index == 'b0000000000|01`: triplet[0], digit 1 within triplet  
+- `index == 'b0000000000|10`: triplet[0], digit 2 within triplet  
+- `index == 'b0000000001|00`: triplet[1], digit 0 within triplet
 
-## How does it work?
-
-When you edit the info.yaml to choose a different ID, the [GitHub Action](.github/workflows/gds.yaml) will fetch the digital netlist of your design from Wokwi.
-
-After that, the action uses the open source ASIC tool called [OpenLane](https://www.zerotoasiccourse.com/terminology/openlane/) to build the files needed to fabricate an ASIC.
-
-## Resources
-
-* [FAQ](https://tinytapeout.com/faq/)
-* [Digital design lessons](https://tinytapeout.com/digital_design/)
-* [Learn how semiconductors work](https://tinytapeout.com/siliwiz/)
-* [Join the community](https://discord.gg/rPK2nSjxy8)
-
-## What next?
-
-* Share your GDS on Twitter, tag it [#tinytapeout](https://twitter.com/hashtag/tinytapeout?src=hashtag_click) and [link me](https://twitter.com/matthewvenn)!
+## How to Test:
+For simulation, please use the provided testbench and Makefile. It is important to run the `genmux.py` Python script first, as it generates the test vectors required by the Verilog testbench. For testing the physical chip, release the reset and compare the digits of Pi against a reference.
